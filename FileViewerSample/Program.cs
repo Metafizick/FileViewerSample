@@ -37,7 +37,11 @@ namespace FileViewerSample
             }
         }
 
-
+        /// <summary>
+        /// Перерисовка экрана для отображения списка
+        /// </summary>
+        /// <param name="items">Список текущих элементов</param>
+        /// <param name="selected">Выбранный элемент списка</param>
         static void ShowList(IEnumerable<BaseViewItem> items, BaseViewItem selected = null)
         {
             Console.Clear();
@@ -58,6 +62,10 @@ namespace FileViewerSample
             }
         }
 
+        /// <summary>
+        /// Вывод на экран строки элемента
+        /// </summary>
+        /// <param name="item"></param>
         static void PrintItem(BaseViewItem item)
         {
             var name = item.Name.Length <= 50 ? item.Name : $"{item.Name.Substring(0, 47)}...";
@@ -66,6 +74,11 @@ namespace FileViewerSample
             Console.WriteLine($"{name,-50} {itemType,3} {size,15}");
         }
 
+        /// <summary>
+        /// Форматирование размера
+        /// </summary>
+        /// <param name="size"></param>
+        /// <returns></returns>
         static string BytesSizeForamt(long size)
         {
             string[] suffixes = { "B", "KB", "MB", "TB" };

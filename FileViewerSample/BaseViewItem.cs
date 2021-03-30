@@ -4,6 +4,9 @@ using System.Text;
 
 namespace FileViewerSample
 {
+    /// <summary>
+    /// Элемент отображэения файлового мендежера
+    /// </summary>
     public class BaseViewItem
     {
         /// <summary>
