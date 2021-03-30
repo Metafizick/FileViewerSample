@@ -17,6 +17,9 @@ namespace FileViewerSample
                 var inputKey = Console.ReadKey(false);
                 switch (inputKey.Key)
                 {
+                    case ConsoleKey.Home:
+                        manager.Home();
+                        break;
                     case ConsoleKey.PageUp:
                         manager.First();
                         break;
@@ -32,9 +35,25 @@ namespace FileViewerSample
                     case ConsoleKey.Enter:
                         manager.SelectOpen();
                         break;
+                    case ConsoleKey.Delete:
+                        if (DeleteRequest(manager.Selected))
+                            manager.Delete();
+                        break;
                 }
                 ShowList(manager.Items, manager.Selected);
             }
+        }
+
+        static bool DeleteRequest(BaseViewItem item)
+        {
+            Console.ResetColor();
+            Console.Clear();
+            Console.WriteLine(item.MainPath);
+            Console.ForegroundColor = ConsoleColor.Red;
+            Console.Write("Удалить выбранный элемент? ");
+            Console.ResetColor();
+            var key = Console.ReadKey();
+            return key.Key == ConsoleKey.Y;
         }
 
         /// <summary>
@@ -44,6 +63,7 @@ namespace FileViewerSample
         /// <param name="selected">Выбранный элемент списка</param>
         static void ShowList(IEnumerable<BaseViewItem> items, BaseViewItem selected = null)
         {
+            Console.ResetColor();
             Console.Clear();
             foreach (var item in items)
             {
@@ -58,8 +78,8 @@ namespace FileViewerSample
                     Console.ForegroundColor = ConsoleColor.White;
                 }
                 PrintItem(item);
-                Console.ResetColor();
             }
+            Console.ResetColor();
         }
 
         /// <summary>

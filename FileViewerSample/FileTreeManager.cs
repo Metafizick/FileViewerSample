@@ -40,10 +40,15 @@ namespace FileViewerSample
         /// <returns>true - если удалось перейти в папку</returns>
         public bool ChangePath(string path)
         {
-            if (Directory.Exists(path))
+            if (path == null)
+            {
+                FillDisk();
+                First();
+            }
+            else if (Directory.Exists(path))
             {
                 FillItems(path);
-                Selected = Items.FirstOrDefault();
+                First();
                 return true;
             }
             return false;
@@ -96,6 +101,41 @@ namespace FileViewerSample
                 return false;
         }
 
+        public void Home()
+        {
+            FillDisk();
+            First();
+        }
+
+        /// <summary>
+        /// удаление выбранной папки/файла
+        /// </summary>
+        /// <returns></returns>
+        public bool Delete()
+        {
+            if (Selected != null && !Items.First().Equals(Selected))
+            {
+                try
+                {
+                    // Удаляем физические файлы/папки
+                    if (Selected.Size.HasValue)
+                        File.Delete(Selected.MainPath);
+                    else
+                        Directory.Delete(Selected.MainPath, true);
+                    // Удаляем элемент из списка
+                    Items.Remove(Selected);
+                    // Выбираем другой элемент
+                    Previous();
+                    return true;
+                }
+                catch (Exception ex)
+                {
+                    // skip error
+                }
+            }
+            return false;
+        }
+
         /// <summary>
         /// Заполнение списка элементами выбранной папки
         /// </summary>
@@ -104,21 +144,9 @@ namespace FileViewerSample
         {
             List<BaseViewItem> list = new List<BaseViewItem>();
 
-            // поиск предыдущий папки
-            var parent = Directory.GetParent(path);
-            if (parent != null && !parent.FullName.Equals(path))
-            {
-                var item = new BaseViewItem()
-                {
-                    MainPath = parent.FullName,
-                    Name = "."
-                };
-                list.Add(item);
-            }
-
             try
             {
-                // перебираем элементы текйщий папки и наполняем список элементами
+                // перебираем элементы текущий папки и наполняем список элементами
                 foreach (var entry in Directory.GetFileSystemEntries(path))
                 {
                     try
@@ -141,8 +169,47 @@ namespace FileViewerSample
             {
                 // skip error
             }
-
+            
+            // сортировка по типу (папка/файл), а потом по имени
             Items = list.OrderBy(o => o.Size.HasValue).ThenBy(o => o.Name).ToList();
+
+            // поиск предыдущий папки
+            var itemParent = new BaseViewItem() { Name = "." };
+            var parent = Directory.GetParent(path);
+            if (parent != null && !parent.FullName.Equals(path))
+                itemParent.MainPath = parent.FullName;
+            Items.Insert(0, itemParent);
+        }
+
+        private void FillDisk()
+        {
+            List<BaseViewItem> list = new List<BaseViewItem>();
+            try
+            {
+                // перебираем элементы текущий папки и наполняем список элементами
+                foreach (var entry in Environment.GetLogicalDrives())
+                {
+                    try
+                    {
+                        var item = new BaseViewItem()
+                        {
+                            MainPath = entry,
+                            Name = entry
+                        };
+                        list.Add(item);
+                    }
+                    catch
+                    {
+                        // skip error
+                    }
+                }
+            }
+            catch
+            {
+                // skip error
+            }
+            // сортировка по типу (папка/файл), а потом по имени
+            Items = list.OrderBy(o => o.Name).ToList();
         }
     }
 }
